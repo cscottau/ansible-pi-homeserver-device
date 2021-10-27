@@ -1,0 +1,5 @@
+# Vars for creating the encrypted partition
+cloud_disk: /dev/sda
+cloud_partition: 1
+cloud_partition_keyfile: /root/cloudkey
+cloud_partition_name: ourcloud

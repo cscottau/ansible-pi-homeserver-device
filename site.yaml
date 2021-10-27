@@ -1,0 +1,44 @@
+---
+- name: Create the encrypted cloud volume 
+  hosts: pi
+
+  tasks:
+
+  - name: Install the required packages
+    package:
+      name: 
+        - busybox 
+        - cryptsetup 
+        - initramfs-tools
+      state: present
+
+  - name: Create the new partition
+    community.general.parted:
+      device: "{{ cloud_disk }}"
+      number: "{{ cloud_partition }}"
+      state: present
+
+  - name: Create the pass-phrase keyfile for auto decrypt
+    copy:
+      content: "{{ encryption_passphrase }}"
+      dest: "{{ cloud_partition_keyfile }}"
+      mode: 0600
+      owner: root
+      group: root
+
+  - name: Create cloud container with the above keyfile
+    community.crypto.luks_device:
+      device: "{{ cloud_disk }}{{ cloud_partition }}"
+      state: opened
+      name: "{{ cloud_partition_name }}"
+      keyfile: "{{ cloud_partition_keyfile }}"
+
+  - name: Format the filesystem
+    filesystem:
+      fstype: ext4
+      dev: /dev/mapper/{{ cloud_partition_name }}
+
+  - name: Create the crypttab file
+    lineinfile:
+      line: "{{ cloud_partition_name }}    {{ cloud_disk }}{{ cloud_partition }}    {{ cloud_partition_keyfile }}"
+      path: /etc/crypttab
