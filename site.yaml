@@ -13,7 +13,7 @@
       state: present
 
   - name: Create the new partition
-    community.general.parted:
+    parted:
       device: "{{ cloud_disk }}"
       number: "{{ cloud_partition }}"
       state: present
@@ -27,7 +27,7 @@
       group: root
 
   - name: Create cloud container with the above keyfile
-    community.crypto.luks_device:
+    luks_device:
       device: "{{ cloud_disk }}{{ cloud_partition }}"
       state: opened
       name: "{{ cloud_partition_name }}"
